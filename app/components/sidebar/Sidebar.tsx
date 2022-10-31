@@ -35,7 +35,7 @@ export const Sidebar = () => {
                         />
                     }
                 >
-                    Pending
+                    In Progress
                 </SidebarItem>
                 <SidebarItem
                     icon={

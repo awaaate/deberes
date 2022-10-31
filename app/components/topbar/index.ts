@@ -1,3 +1,2 @@
-import { Topbar } from "./topbar";
-const a = "hel"
+import { Topbar } from "./Topbar";
 export default Topbar;
