@@ -5,11 +5,14 @@ import { BlobOptions } from 'buffer';
 const router : Router = express.Router() ;
 const prisma : PrismaClient = new PrismaClient() ;
 
-// Get all tasks *** include { withUser : boolean }
+// Get all tasks *** include { withUser : boolean, withTags : boolean }
 router.get('/', async (req : Request, res : Response, next : NextFunction) => {
     try {
         const tasks : Task[] = await prisma.task.findMany({
-            include : { user : req.body.withUser }, 
+            include : { 
+                user : req.body.withUser,
+                tags : req.body.withTags,
+            }, 
         }) ;
         res.json(tasks) ;
     } catch (error) {
