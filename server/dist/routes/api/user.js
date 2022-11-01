@@ -16,17 +16,16 @@ const express_1 = __importDefault(require("express"));
 const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
-// Get all tasks *** include { withUser : boolean }
+// Get all users *** include { withTasks : boolean }
 router.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tasks = yield prisma.task.findMany({
-            include: { user: req.body.withUser },
+        const users = yield prisma.user.findMany({
+            include: { tasks: req.body.withTasks }
         });
-        res.json(tasks);
+        res.json(users);
     }
     catch (err) {
         next(err);
     }
 }));
-//
 module.exports = router;
