@@ -57,14 +57,39 @@ router.post('/', async (req : Request, res : Response, next : NextFunction) => {
     }
 }) ;
 
-// Update task by id
+// Update task by id { tags : string[] }
 router.patch('/:id', async (req : Request, res :Response, next : NextFunction) => {
     try {
         if (await prisma.task.findUnique({ where : { id  : req.params.id } }) !== null) {
-            const task = await prisma.task.update({
+            /*
+            const tags : Tag [] = [] ;
+            for (const tagName of req.body.tags) {
+                const tag = (await prisma.tag.findUnique(tagName) !== null) ? 
+                    await prisma.tag.findUnique(tagName) :
+                    await prisma.tag.create({ data : { name : tagName } }) ;
+                tags.push(tag!) ;
+            }
+            */
+            let task = await prisma.task.update({
                 where : { id : req.params.id },
                 data : req.body,
+                include : {
+                    user : true,
+                    tags : true,
+                }
             }) ;
+            /*
+            await prisma.task.update({
+                where : { id : req.params.id }, 
+                data : {
+                    tags : task.tags.concat(tags)
+                },
+                include : {
+                    user : true,
+                    tags : true,
+                }
+            })
+            */
             res.json(task) ;
         } else {
             res.status(400).json({ msg : `The task with id ${req.params.id} does not exist` }) ;

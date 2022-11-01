@@ -35,6 +35,25 @@ router.post('/', async (req : Request, res : Response, next : NextFunction) => {
     }
 }) ;
 
+// Delete a tag by name
+router.delete('/:name', async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const tagToDlete : Tag | null = await prisma.tag.findUnique({
+            where : { name : req.params.name },
+        }) ;
+        if (tagToDlete !== null) {
+            const deletedTag : Tag = await prisma.tag.delete({
+                where : { name : req.params.name },
+            }) ;
+            res.json({deletedTag, msg : "Task deleated successfully"}) ;
+        } else {
+            res.status(400).json({ msg : `Tag with name ${req.params.id} does not exist`})
+        }
+    } catch (error) {
+        next(error) ;
+    }
+});
+
 
 
 module.exports = router ;
