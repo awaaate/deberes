@@ -1,5 +1,6 @@
 import express, {Application, Request, Router, Response, NextFunction} from 'express' ;
 import { PrismaClient, Tag, Task, User } from '@prisma/client';
+import { read } from 'fs';
 
 const router : Router = express.Router() ;
 const prisma : PrismaClient = new PrismaClient() ;
@@ -47,7 +48,7 @@ router.delete('/:name', async (req : Request, res : Response, next : NextFunctio
             }) ;
             res.json({deletedTag, msg : "Task deleated successfully"}) ;
         } else {
-            res.status(400).json({ msg : `Tag with name ${req.params.id} does not exist`})
+            res.status(400).json({ msg : `Tag with name ${req.params.name} does not exist`})
         }
     } catch (error) {
         next(error) ;
@@ -55,24 +56,32 @@ router.delete('/:name', async (req : Request, res : Response, next : NextFunctio
 });
 
 // Delete a tag from a task
-// router.delete('/fromTask', async (req : Request, res : Response, next : NextFunction) => {
-//     try {
-//         if (await prisma.tag.findUnique({ where : { name : req.body.tagName } }) !== null && await prisma.task.findUnique({ where : { id : req.body.id } })) {
-//             await prisma.task.update({
-//                 where : { id : req.body.id },
-//                 data : {
-//                     tags : {
-//                         disconnect : [{}]
-//                     }
-//                 }
-//             }) ;
-//         } else {
-//             res.status(400).json({ msg : "Bad request, either the tag or the task do NOT exist"}) ;
-//         }
-//     } catch (error) {
-//         next(error) ;
-//     }
-// }) ;
+router.delete('/', async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        if (await prisma.tagsOnTasks.findUnique({ 
+            where : { 
+                taskId_tagName : { 
+                    tagName : req.body.tagName, 
+                    taskId : req.body.taskId
+                } 
+            } 
+        }) !== null) {
+            await prisma.tagsOnTasks.delete({ 
+                where : { 
+                    taskId_tagName : { 
+                        tagName : req.body.tagName, 
+                        taskId : req.body.taskId
+                    } 
+                } 
+            })
+        res.json({ msg : "Tag no longer points to the task" })
+        } else {
+            res.status(400).json({ msg : "Bad request, either the tag or the task do NOT exist"}) ;
+        }
+    } catch (error) {
+        next(error) ;
+    }
+}) ;
 
 
 
