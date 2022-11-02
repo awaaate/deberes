@@ -54,6 +54,26 @@ router.delete('/:name', async (req : Request, res : Response, next : NextFunctio
     }
 });
 
+// Delete a tag from a task
+// router.delete('/fromTask', async (req : Request, res : Response, next : NextFunction) => {
+//     try {
+//         if (await prisma.tag.findUnique({ where : { name : req.body.tagName } }) !== null && await prisma.task.findUnique({ where : { id : req.body.id } })) {
+//             await prisma.task.update({
+//                 where : { id : req.body.id },
+//                 data : {
+//                     tags : {
+//                         disconnect : [{}]
+//                     }
+//                 }
+//             }) ;
+//         } else {
+//             res.status(400).json({ msg : "Bad request, either the tag or the task do NOT exist"}) ;
+//         }
+//     } catch (error) {
+//         next(error) ;
+//     }
+// }) ;
+
 
 
 module.exports = router ;

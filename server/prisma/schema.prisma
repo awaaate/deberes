@@ -15,7 +15,7 @@ model User {
   name String
   email String @unique
   about String?
-  tasks Task []
+  tasks Task[]
 }
 
 model Task {
@@ -25,12 +25,22 @@ model Task {
   status String @default("to start")
   creationDate DateTime @default(now())
   modificationDate DateTime @updatedAt
-  tags Tag []
+  tags TagsOnTasks []
   user User @relation(fields: [userId], references: [id])
   userId String
 }
 
 model Tag {
   name String @id
-  tasks Task[]
+  tasks TagsOnTasks []
+}
+
+model TagsOnTasks {
+  task  Task @relation(fields: [taskId], references: [id])
+  taskId String
+  tag Tag @relation(fields: [tagName], references: [name])
+  tagName String
+  asignedAt DateTime @default(now())
+
+  @@id([taskId, tagName])
 }

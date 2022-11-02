@@ -1,6 +1,7 @@
 import express, {Application, Request, Router, Response, NextFunction} from 'express' ;
-import { PrismaClient, Task, User, Tag } from '@prisma/client';
-import { BlobOptions } from 'buffer';
+import { PrismaClient, Task, User, Tag, TagsOnTasks } from '@prisma/client';
+import { create } from 'domain';
+
 
 const router : Router = express.Router() ;
 const prisma : PrismaClient = new PrismaClient() ;
@@ -48,9 +49,29 @@ router.post('/', async (req : Request, res : Response, next : NextFunction) => {
                 title : req.body.title,
                 body : req.body.body,
                 status : req.body.status,
-                userId : req.body.userId
-            }
+                userId : req.body.userId,
+            },
         }) ;
+
+        let tagName : string ;
+        for (tagName of req.body.tags) {
+            const newTag : Tag | null = (await prisma.tag.findUnique({ where : {name : tagName}}) !== null) ? 
+                await prisma.tag.findUnique({ where : {name : tagName } }) :
+                await prisma.tag.create({ data : { name : tagName } }) ;
+            await prisma.task.update({
+                where : { id : newTask.id },
+                data : {
+                    tags : {
+                        create : [ 
+                            {
+                                tagName 
+                            }
+                        ]
+                    }
+                }
+            })
+        }
+
         res.json(newTask) ;
     } catch (error) {
         next(error) ;
@@ -61,35 +82,38 @@ router.post('/', async (req : Request, res : Response, next : NextFunction) => {
 router.patch('/:id', async (req : Request, res :Response, next : NextFunction) => {
     try {
         if (await prisma.task.findUnique({ where : { id  : req.params.id } }) !== null) {
-            /*
-            const tags : Tag [] = [] ;
-            for (const tagName of req.body.tags) {
-                const tag = (await prisma.tag.findUnique(tagName) !== null) ? 
-                    await prisma.tag.findUnique(tagName) :
-                    await prisma.tag.create({ data : { name : tagName } }) ;
-                tags.push(tag!) ;
-            }
-            */
             let task = await prisma.task.update({
                 where : { id : req.params.id },
-                data : req.body,
-                include : {
-                    user : true,
-                    tags : true,
-                }
-            }) ;
-            /*
-            await prisma.task.update({
-                where : { id : req.params.id }, 
                 data : {
-                    tags : task.tags.concat(tags)
+                    title : req.body.title,
+                    body : req.body.body,
+                    status : req.body.status,
+                    userId : req.body.userId
                 },
                 include : {
                     user : true,
                     tags : true,
                 }
-            })
-            */
+            }) ;
+            let tagName : string ;
+            for (tagName of req.body.tags) {
+                const newTag : Tag | null = (await prisma.tag.findUnique({ where : {name : tagName}}) !== null) ? 
+                    await prisma.tag.findUnique({ where : {name : tagName } }) :
+                    await prisma.tag.create({ data : { name : tagName } }) ;
+                await prisma.task.update({
+                    where : { id : req.params.id }, 
+                    data : {
+                        tags : {
+                            create : [
+                                {
+                                    tagName  
+                                }
+                            ]
+                        }
+                    },
+                }) ;
+            }
+            
             res.json(task) ;
         } else {
             res.status(400).json({ msg : `The task with id ${req.params.id} does not exist` }) ;
