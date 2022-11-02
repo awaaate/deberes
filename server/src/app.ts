@@ -11,5 +11,7 @@ app.use('/api/user', require('./routes/api/user')) ;
 app.use('/api/task', require('./routes/api/task')) ;
 app.use('/api/tag', require('./routes/api/tag')) ;
 
+app.use('/login/verify', require('./routes/login/verification')) ;
+
 const PORT : string = process.env.PORT || '3000' ;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)) ;

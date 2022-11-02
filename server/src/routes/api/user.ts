@@ -1,5 +1,6 @@
 import express, {Application, Request, Router, Response, NextFunction} from 'express' ;
 import { PrismaClient, Task, User, Tag } from '@prisma/client';
+import randomstring, {} from 'randomstring' ;
 
 const router : Router = express.Router() ;
 const prisma : PrismaClient = new PrismaClient() ;
@@ -46,10 +47,14 @@ router.post('/', async (req : Request, res : Response, next : NextFunction) => {
                 data : {
                     name : req.body.name,
                     email : req.body.email,
-                    about : req.body.about
+                    about : req.body.about,
+                    pasword : req.body.pasword,
+                    secretEmailVerificationToken : randomstring.generate({length : 10, charset : 'numeric'})
                 }
             }) ;
             res.json(newUser) ;
+            // Send email with the token
+            console.log(newUser.secretEmailVerificationToken) ;
         } else {
             res.status(400).json({ msg : `This email is already taken by ${user.name}` }) ;
         }
